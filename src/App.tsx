@@ -104,19 +104,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-ivory text-charcoal selection:bg-gold selection:text-white">
+    <div className="min-h-screen bg-navy text-ivory selection:bg-gold selection:text-navy">
       {/* Admin Toggle */}
       {!isAdmin && (
         <button 
           onClick={() => setShowLogin(true)}
-          className="fixed bottom-6 right-6 p-3 bg-navy text-white rounded-full shadow-lg hover:bg-charcoal transition-colors z-50"
+          className="fixed bottom-6 right-6 p-3 bg-gold text-navy rounded-full shadow-lg hover:bg-ivory transition-colors z-50"
         >
           <Settings className="w-5 h-5" />
         </button>
       )}
 
       {isAdmin && (
-        <div className="fixed top-0 left-0 right-0 bg-navy text-white p-4 flex justify-between items-center z-50 shadow-md">
+        <div className="fixed top-0 left-0 right-0 bg-charcoal text-ivory p-4 flex justify-between items-center z-50 shadow-md border-b border-gold/20">
           <div className="flex items-center gap-2 font-serif italic">
             <Package className="w-5 h-5 text-gold" />
             <span>Admin Dashboard</span>
@@ -186,10 +186,10 @@ function CatalogView({
       className="space-y-16"
     >
       <header className="text-center space-y-4">
-        <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-navy">
+        <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-gold">
           MEN 31
         </h1>
-        <p className="text-gold font-medium tracking-[0.3em] uppercase text-sm">
+        <p className="text-ivory font-medium tracking-[0.3em] uppercase text-sm">
           Premium Essentials
         </p>
       </header>
@@ -206,7 +206,7 @@ function CatalogView({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               onClick={() => onSelectCategory(category)}
-              className="group cursor-pointer relative aspect-[3/4] overflow-hidden bg-platinum"
+              className="group cursor-pointer relative aspect-[3/4] overflow-hidden bg-charcoal"
             >
               <img 
                 src={previewImage} 
@@ -214,13 +214,13 @@ function CatalogView({
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-navy/20 group-hover:bg-navy/40 transition-colors" />
+              <div className="absolute inset-0 bg-navy/40 group-hover:bg-navy/60 transition-colors" />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                <h2 className="text-3xl font-serif text-white mb-2 tracking-tight">
+                <h2 className="text-3xl font-serif text-ivory mb-2 tracking-tight">
                   {category}
                 </h2>
                 <div className="h-px w-12 bg-gold transition-all duration-500 group-hover:w-24" />
-                <span className="mt-4 text-ivory/80 text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="mt-4 text-gold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                   View Collection
                 </span>
               </div>
@@ -258,23 +258,23 @@ function CategoryItemsView({
     >
       <button 
         onClick={onBack}
-        className="flex items-center gap-2 text-gold hover:text-navy transition-colors group"
+        className="flex items-center gap-2 text-gold hover:text-ivory transition-colors group"
       >
         <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
         <span className="uppercase tracking-widest text-sm font-bold">Back to Catalog</span>
       </button>
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-platinum pb-8">
-        <h2 className="text-5xl font-serif font-bold text-navy">{category}</h2>
-        <p className="text-charcoal/60 uppercase tracking-widest text-xs">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gold/20 pb-8">
+        <h2 className="text-5xl font-serif font-bold text-gold">{category}</h2>
+        <p className="text-ivory/60 uppercase tracking-widest text-xs">
           {items.length} {items.length === 1 ? 'Item' : 'Items'} Found
         </p>
       </div>
 
       {items.length === 0 ? (
         <div className="py-24 text-center">
-          <Package className="w-12 h-12 text-platinum mx-auto mb-4" />
-          <p className="text-charcoal/40 italic">No items in this category yet.</p>
+          <Package className="w-12 h-12 text-charcoal mx-auto mb-4" />
+          <p className="text-ivory/40 italic">No items in this category yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
@@ -284,7 +284,7 @@ function CategoryItemsView({
               key={item.id} 
               className="group space-y-4"
             >
-              <div className="relative aspect-[3/4] overflow-hidden bg-platinum">
+              <div className="relative aspect-[3/4] overflow-hidden bg-charcoal">
                 <img 
                   src={item.imageUrl} 
                   alt={item.name}
@@ -294,7 +294,7 @@ function CategoryItemsView({
                 {isAdmin && (
                   <button 
                     onClick={() => deleteItem(item.id)}
-                    className="absolute top-4 right-4 p-2 bg-white/90 text-red-600 rounded-full shadow-sm hover:bg-red-600 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 p-2 bg-navy/90 text-red-400 rounded-full shadow-sm hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -302,7 +302,7 @@ function CategoryItemsView({
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-medium text-navy group-hover:text-gold transition-colors">
+                  <h3 className="text-lg font-medium text-ivory group-hover:text-gold transition-colors">
                     {item.name}
                   </h3>
                   <span className="font-serif text-gold font-bold">
@@ -311,7 +311,7 @@ function CategoryItemsView({
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   {item.sizes.map(size => (
-                    <span key={size} className="text-[10px] px-2 py-0.5 border border-platinum text-charcoal/60 uppercase tracking-tighter">
+                    <span key={size} className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold uppercase tracking-tighter">
                       {size}
                     </span>
                   ))}
@@ -330,11 +330,11 @@ function LoginView({ username, password, setUsername, setPassword, onLogin, onCa
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="max-w-md mx-auto bg-white p-12 shadow-2xl border border-platinum"
+      className="max-w-md mx-auto bg-charcoal p-12 shadow-2xl border border-gold/20"
     >
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-serif text-navy mb-2">Admin Login</h2>
-        <p className="text-charcoal/40 text-sm">Access the management system</p>
+        <h2 className="text-3xl font-serif text-gold mb-2">Admin Login</h2>
+        <p className="text-ivory/40 text-sm">Access the management system</p>
       </div>
       <form onSubmit={onLogin} className="space-y-6">
         <div className="space-y-2">
@@ -343,7 +343,7 @@ function LoginView({ username, password, setUsername, setPassword, onLogin, onCa
             type="text" 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 bg-ivory border border-platinum focus:border-gold outline-none transition-colors"
+            className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none transition-colors text-ivory"
             required
           />
         </div>
@@ -353,7 +353,7 @@ function LoginView({ username, password, setUsername, setPassword, onLogin, onCa
             type="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-ivory border border-platinum focus:border-gold outline-none transition-colors"
+            className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none transition-colors text-ivory"
             required
           />
         </div>
@@ -361,13 +361,13 @@ function LoginView({ username, password, setUsername, setPassword, onLogin, onCa
           <button 
             type="button"
             onClick={onCancel}
-            className="flex-1 p-3 border border-platinum text-charcoal hover:bg-ivory transition-colors uppercase text-xs tracking-widest font-bold"
+            className="flex-1 p-3 border border-gold/20 text-ivory hover:bg-navy transition-colors uppercase text-xs tracking-widest font-bold"
           >
             Cancel
           </button>
           <button 
             type="submit"
-            className="flex-1 p-3 bg-navy text-white hover:bg-charcoal transition-colors uppercase text-xs tracking-widest font-bold"
+            className="flex-1 p-3 bg-gold text-navy hover:bg-ivory transition-colors uppercase text-xs tracking-widest font-bold"
           >
             Login
           </button>
@@ -451,7 +451,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
     <>
       <button 
         onClick={() => setShowModal(true)}
-        className="fixed bottom-6 left-6 p-4 bg-gold text-white rounded-full shadow-xl hover:bg-navy transition-all z-50 flex items-center gap-2 pr-6 group"
+        className="fixed bottom-6 left-6 p-4 bg-gold text-navy rounded-full shadow-xl hover:bg-ivory transition-all z-50 flex items-center gap-2 pr-6 group"
       >
         <Plus className="w-6 h-6 transition-transform group-hover:rotate-90" />
         <span className="font-bold uppercase tracking-widest text-xs">Add New Item</span>
@@ -465,15 +465,15 @@ function AdminAddItem({ categories }: { categories: string[] }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowModal(false)}
-              className="absolute inset-0 bg-navy/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-navy/90 backdrop-blur-sm"
             />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-white shadow-2xl overflow-hidden"
+              className="relative w-full max-w-2xl bg-charcoal shadow-2xl overflow-hidden border border-gold/20"
             >
-              <div className="p-8 bg-navy text-white flex justify-between items-center">
+              <div className="p-8 bg-navy text-gold flex justify-between items-center border-b border-gold/20">
                 <h2 className="text-2xl font-serif">New Catalog Entry</h2>
                 <button onClick={() => setShowModal(false)}><X className="w-6 h-6" /></button>
               </div>
@@ -486,7 +486,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                       type="text" 
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full p-3 bg-ivory border border-platinum focus:border-gold outline-none"
+                      className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none text-ivory"
                       required
                     />
                   </div>
@@ -497,19 +497,21 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                       step="0.01"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="w-full p-3 bg-ivory border border-platinum focus:border-gold outline-none"
+                      className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none text-ivory"
                       required
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Category</label>
-                    <select 
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full p-3 bg-ivory border border-platinum focus:border-gold outline-none appearance-none"
-                    >
-                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select 
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none appearance-none text-ivory"
+                      >
+                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -518,14 +520,14 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                     <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Image</label>
                     <div 
                       onClick={handleUpload}
-                      className="aspect-video bg-ivory border-2 border-dashed border-platinum flex flex-col items-center justify-center cursor-pointer hover:border-gold transition-colors overflow-hidden relative"
+                      className="aspect-video bg-navy border-2 border-dashed border-gold/20 flex flex-col items-center justify-center cursor-pointer hover:border-gold transition-colors overflow-hidden relative"
                     >
                       {imageUrl ? (
                         <img src={imageUrl} className="w-full h-full object-cover" />
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-platinum mb-2" />
-                          <span className="text-xs text-charcoal/40">Upload via Cloudinary</span>
+                          <Upload className="w-8 h-8 text-gold/40 mb-2" />
+                          <span className="text-[10px] text-gold/40 uppercase tracking-widest">Upload via Cloudinary</span>
                         </>
                       )}
                     </div>
@@ -542,8 +544,8 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                           className={cn(
                             "px-3 py-1 text-[10px] border transition-colors",
                             sizes.includes(size) 
-                              ? "bg-navy text-white border-navy" 
-                              : "border-platinum text-charcoal/60 hover:border-gold"
+                              ? "bg-gold text-navy border-gold" 
+                              : "border-gold/20 text-gold/60 hover:border-gold"
                           )}
                         >
                           {size}
@@ -556,7 +558,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                 <div className="md:col-span-2 pt-4">
                   <button 
                     type="submit"
-                    className="w-full p-4 bg-gold text-white font-bold uppercase tracking-[0.2em] text-sm hover:bg-navy transition-colors"
+                    className="w-full p-4 bg-gold text-navy font-bold uppercase tracking-[0.2em] text-sm hover:bg-ivory transition-colors"
                   >
                     Publish to Catalog
                   </button>

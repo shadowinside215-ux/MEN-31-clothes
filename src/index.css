@@ -13,6 +13,6 @@
 
 @layer base {
   body {
-    @apply bg-ivory text-charcoal font-sans;
+    @apply bg-navy text-ivory font-sans;
   }
 }
