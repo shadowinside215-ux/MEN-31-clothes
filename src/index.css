@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0F1A2B;
+  --color-ivory: #F5F1E8;
+  --color-platinum: #C7CCD3;
+  --color-charcoal: #1C1C1C;
+  --color-gold: #B39A6A;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+}
+
+@layer base {
+  body {
+    @apply bg-ivory text-charcoal font-sans;
+  }
+}

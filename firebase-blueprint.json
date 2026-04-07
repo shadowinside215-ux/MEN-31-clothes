@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "ClothingItem": {
+      "title": "Clothing Item",
+      "description": "A clothing item in the catalog",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the item" },
+        "price": { "type": "number", "description": "The price of the item" },
+        "category": { "type": "string", "description": "The category of the item" },
+        "imageUrl": { "type": "string", "description": "The URL of the item image" },
+        "sizes": { "type": "array", "items": { "type": "string" }, "description": "Available sizes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["name", "price", "category", "imageUrl", "sizes"]
+    }
+  },
+  "firestore": {
+    "/items/{itemId}": {
+      "schema": "ClothingItem",
+      "description": "Collection of clothing items"
+    }
+  }
+}
