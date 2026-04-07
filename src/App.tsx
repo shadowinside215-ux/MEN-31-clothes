@@ -249,6 +249,7 @@ export default function App() {
   const [categoryConfigs, setCategoryConfigs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [configsLoading, setConfigsLoading] = useState(true);
+  const [titleClicks, setTitleClicks] = useState(0);
 
   // Test connection to Firestore
   useEffect(() => {
@@ -345,7 +346,8 @@ export default function App() {
         ))}
       </div>
 
-      {/* Admin Toggle */}
+      {/* Admin Toggle (Hidden as requested) */}
+      {/* 
       {!isAdmin && (
         <button 
           onClick={() => setShowLogin(true)}
@@ -354,6 +356,7 @@ export default function App() {
           <Settings className="w-5 h-5" />
         </button>
       )}
+      */}
 
       {isAdmin && (
         <div className="fixed top-0 left-0 right-0 bg-charcoal text-ivory p-4 flex justify-between items-center z-50 shadow-md border-b border-gold/20">
@@ -400,6 +403,9 @@ export default function App() {
                 items={items}
                 categoryConfigs={categoryConfigs}
                 t={t}
+                setShowLogin={setShowLogin}
+                titleClicks={titleClicks}
+                setTitleClicks={setTitleClicks}
               />
             )}
           </AnimatePresence>
@@ -420,14 +426,20 @@ function CatalogView({
   isAdmin,
   items,
   categoryConfigs,
-  t
+  t,
+  setShowLogin,
+  titleClicks,
+  setTitleClicks
 }: { 
   categories: string[], 
   onSelectCategory: (c: string) => void,
   isAdmin: boolean,
   items: ClothingItem[],
   categoryConfigs: Record<string, string>,
-  t: any
+  t: any,
+  setShowLogin: (show: boolean) => void,
+  titleClicks: number,
+  setTitleClicks: (clicks: number) => void
 }) {
   const handleCategoryCoverUpload = (category: string) => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -474,7 +486,22 @@ function CatalogView({
       className="space-y-16"
     >
       <header className="text-center space-y-4">
-        <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-gold">
+        <h1 
+          onClick={() => {
+            if (!isAdmin) {
+              const newClicks = titleClicks + 1;
+              if (newClicks >= 5) {
+                setShowLogin(true);
+                setTitleClicks(0);
+              } else {
+                setTitleClicks(newClicks);
+                // Reset clicks after 2 seconds of inactivity
+                setTimeout(() => setTitleClicks(0), 2000);
+              }
+            }
+          }}
+          className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-gold cursor-default select-none"
+        >
           {t.title}
         </h1>
         <p className="text-ivory font-medium tracking-[0.3em] uppercase text-sm">
