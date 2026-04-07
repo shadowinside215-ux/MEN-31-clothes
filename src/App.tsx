@@ -19,8 +19,111 @@ import {
   Upload, 
   Trash2,
   Package,
-  Settings
+  Settings,
+  Languages
 } from 'lucide-react';
+
+// --- Translations ---
+const translations = {
+  en: {
+    title: "MEN 31",
+    subtitle: "Premium Essentials",
+    viewCollection: "View Collection",
+    backToCatalog: "Back to Catalog",
+    itemsFound: "Items Found",
+    itemFound: "Item Found",
+    noItems: "No items in this category yet.",
+    adminAccess: "Admin Access",
+    signInGoogle: "Sign in with Google",
+    cancel: "Cancel",
+    logout: "Logout",
+    adminDashboard: "Admin Dashboard",
+    addNewItem: "Add New Item",
+    newCatalogEntry: "New Catalog Entry",
+    itemName: "Item Name",
+    price: "Price (DH)",
+    category: "Category",
+    image: "Image",
+    uploadCloudinary: "Upload via Cloudinary",
+    availableSizes: "Available Sizes",
+    publish: "Publish to Catalog",
+    changeCover: "Change Category Cover",
+    categories: {
+      "MEN 31 Clothes": "MEN 31 Clothes",
+      "Sports": "Sports",
+      "Pants & Boots": "Pants & Boots",
+      "T-Shirts": "T-Shirts",
+      "Vests": "Vests",
+      "Accessories": "Accessories"
+    }
+  },
+  fr: {
+    title: "MEN 31",
+    subtitle: "Essentiels Premium",
+    viewCollection: "Voir la Collection",
+    backToCatalog: "Retour au Catalogue",
+    itemsFound: "Articles Trouvés",
+    itemFound: "Article Trouvé",
+    noItems: "Aucun article dans cette catégorie pour le moment.",
+    adminAccess: "Accès Admin",
+    signInGoogle: "Se connecter avec Google",
+    cancel: "Annuler",
+    logout: "Déconnexion",
+    adminDashboard: "Tableau de Bord Admin",
+    addNewItem: "Ajouter un Article",
+    newCatalogEntry: "Nouvelle Entrée au Catalogue",
+    itemName: "Nom de l'Article",
+    price: "Prix (DH)",
+    category: "Catégorie",
+    image: "Image",
+    uploadCloudinary: "Télécharger via Cloudinary",
+    availableSizes: "Tailles Disponibles",
+    publish: "Publier au Catalogue",
+    changeCover: "Changer la Couverture",
+    categories: {
+      "MEN 31 Clothes": "Vêtements MEN 31",
+      "Sports": "Sport",
+      "Pants & Boots": "Pantalons & Bottes",
+      "T-Shirts": "T-Shirts",
+      "Vests": "Gilets",
+      "Accessories": "Accessoires"
+    }
+  },
+  ar: {
+    title: "MEN 31",
+    subtitle: "أساسيات فاخرة",
+    viewCollection: "عرض المجموعة",
+    backToCatalog: "العودة إلى الكتالوج",
+    itemsFound: "قطع تم العثور عليها",
+    itemFound: "قطعة تم العثور عليها",
+    noItems: "لا توجد قطع في هذه الفئة بعد.",
+    adminAccess: "دخول المسؤول",
+    signInGoogle: "تسجيل الدخول باستخدام جوجل",
+    cancel: "إلغاء",
+    logout: "تسجيل الخروج",
+    adminDashboard: "لوحة تحكم المسؤول",
+    addNewItem: "إضافة قطعة جديدة",
+    newCatalogEntry: "إدخال جديد للكتالوج",
+    itemName: "اسم القطعة",
+    price: "السعر (درهم)",
+    category: "الفئة",
+    image: "الصورة",
+    uploadCloudinary: "رفع عبر كلاوديناري",
+    availableSizes: "المقاسات المتاحة",
+    publish: "نشر في الكتالوج",
+    changeCover: "تغيير غلاف الفئة",
+    categories: {
+      "MEN 31 Clothes": "ملابس MEN 31",
+      "Sports": "رياضة",
+      "Pants & Boots": "سراويل وأحذية",
+      "T-Shirts": "تي شيرت",
+      "Vests": "صدريات",
+      "Accessories": "إكسسوارات"
+    }
+  }
+};
+
+type Language = 'en' | 'fr' | 'ar';
 import { 
   collection, 
   addDoc, 
@@ -31,14 +134,75 @@ import {
   doc, 
   onSnapshot,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
+  getDocFromServer,
+  setDoc
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut, 
+  onAuthStateChanged,
+  type User
+} from 'firebase/auth';
+import { db, auth } from './firebase';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+// --- Error Handling ---
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
 }
 
 // --- Types ---
@@ -50,6 +214,12 @@ interface ClothingItem {
   imageUrl: string;
   sizes: string[];
   createdAt: any;
+}
+
+interface CategoryConfig {
+  id: string;
+  categoryName: string;
+  coverImageUrl: string;
 }
 
 const CATEGORIES = [
@@ -64,15 +234,41 @@ const CATEGORIES = [
 // --- Components ---
 
 export default function App() {
+  const [lang, setLang] = useState<Language>('en');
+  const t = translations[lang];
+  const isRTL = lang === 'ar';
+
+  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [items, setItems] = useState<ClothingItem[]>([]);
+  const [categoryConfigs, setCategoryConfigs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
-  // Auth State (Simple local state as requested)
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // Test connection to Firestore
+  useEffect(() => {
+    async function testConnection() {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (error) {
+        if(error instanceof Error && error.message.includes('the client is offline')) {
+          console.error("Please check your Firebase configuration.");
+        }
+      }
+    }
+    testConnection();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      // Check if user is admin based on email
+      const adminEmail = "dragonballsam86@gmail.com";
+      setIsAdmin(currentUser?.email === adminEmail && currentUser?.emailVerified === true);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, 'items'), orderBy('createdAt', 'desc'));
@@ -83,28 +279,66 @@ export default function App() {
       })) as ClothingItem[];
       setItems(newItems);
       setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'items');
     });
     return () => unsubscribe();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === 'sam' && password === 'sam2006') {
-      setIsAdmin(true);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      const configs: Record<string, string> = {};
+      snapshot.docs.forEach(doc => {
+        const data = doc.data() as CategoryConfig;
+        configs[data.categoryName] = data.coverImageUrl;
+      });
+      setCategoryConfigs(configs);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'categories');
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
       setShowLogin(false);
-    } else {
-      alert('Invalid credentials');
+    } catch (error) {
+      console.error("Login failed", error);
+      alert('Login failed. Please try again.');
     }
   };
 
-  const logout = () => {
-    setIsAdmin(false);
-    setUsername('');
-    setPassword('');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-navy text-ivory selection:bg-gold selection:text-navy">
+    <div className={cn(
+      "min-h-screen bg-navy text-ivory selection:bg-gold selection:text-navy",
+      isRTL ? "font-sans text-right" : "font-sans text-left"
+    )} dir={isRTL ? "rtl" : "ltr"}>
+      {/* Language Switcher */}
+      <div className="fixed top-6 right-6 z-50 flex gap-2">
+        {(['en', 'fr', 'ar'] as const).map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            className={cn(
+              "px-2 py-1 text-[10px] font-bold uppercase tracking-widest border transition-colors",
+              lang === l ? "bg-gold text-navy border-gold" : "bg-navy/50 text-ivory border-gold/20 hover:border-gold"
+            )}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+
       {/* Admin Toggle */}
       {!isAdmin && (
         <button 
@@ -119,13 +353,13 @@ export default function App() {
         <div className="fixed top-0 left-0 right-0 bg-charcoal text-ivory p-4 flex justify-between items-center z-50 shadow-md border-b border-gold/20">
           <div className="flex items-center gap-2 font-serif italic">
             <Package className="w-5 h-5 text-gold" />
-            <span>Admin Dashboard</span>
+            <span>{t.adminDashboard}</span>
           </div>
           <button 
             onClick={logout}
             className="flex items-center gap-2 text-sm hover:text-gold transition-colors"
           >
-            <LogOut className="w-4 h-4" /> Logout
+            <LogOut className="w-4 h-4" /> {t.logout}
           </button>
         </div>
       )}
@@ -134,12 +368,9 @@ export default function App() {
         <AnimatePresence mode="wait">
           {showLogin ? (
             <LoginView 
-              username={username}
-              password={password}
-              setUsername={setUsername}
-              setPassword={setPassword}
               onLogin={handleLogin}
               onCancel={() => setShowLogin(false)}
+              t={t}
             />
           ) : selectedCategory ? (
             <CategoryItemsView 
@@ -147,6 +378,8 @@ export default function App() {
               items={items.filter(i => i.category === selectedCategory)}
               onBack={() => setSelectedCategory(null)}
               isAdmin={isAdmin}
+              t={t}
+              isRTL={isRTL}
             />
           ) : (
             <CatalogView 
@@ -154,6 +387,8 @@ export default function App() {
               onSelectCategory={setSelectedCategory}
               isAdmin={isAdmin}
               items={items}
+              categoryConfigs={categoryConfigs}
+              t={t}
             />
           )}
         </AnimatePresence>
@@ -161,7 +396,7 @@ export default function App() {
 
       {/* Admin Add Modal */}
       {isAdmin && !selectedCategory && !showLogin && (
-        <AdminAddItem categories={CATEGORIES} />
+        <AdminAddItem categories={CATEGORIES} t={t} />
       )}
     </div>
   );
@@ -171,13 +406,54 @@ function CatalogView({
   categories, 
   onSelectCategory, 
   isAdmin,
-  items 
+  items,
+  categoryConfigs,
+  t
 }: { 
   categories: string[], 
   onSelectCategory: (c: string) => void,
   isAdmin: boolean,
-  items: ClothingItem[]
+  items: ClothingItem[],
+  categoryConfigs: Record<string, string>,
+  t: any
 }) {
+  const handleCategoryCoverUpload = (category: string) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      alert('Please configure Cloudinary credentials in the Secrets panel.');
+      return;
+    }
+
+    // @ts-ignore
+    const myWidget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: cloudName,
+        uploadPreset: uploadPreset,
+        cropping: true,
+        croppingAspectRatio: 0.75, // 3:4 ratio
+        showSkipCropButton: false
+      },
+      async (error: any, result: any) => {
+        if (!error && result && result.event === "success") {
+          const imageUrl = result.info.secure_url;
+          try {
+            // Use category name as ID for simplicity
+            const categoryId = category.replace(/\s+/g, '-').toLowerCase();
+            await setDoc(doc(db, 'categories', categoryId), {
+              categoryName: category,
+              coverImageUrl: imageUrl
+            });
+          } catch (err) {
+            handleFirestoreError(err, OperationType.WRITE, `categories/${category}`);
+          }
+        }
+      }
+    );
+    myWidget.open();
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -187,17 +463,18 @@ function CatalogView({
     >
       <header className="text-center space-y-4">
         <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tighter text-gold">
-          MEN 31
+          {t.title}
         </h1>
         <p className="text-ivory font-medium tracking-[0.3em] uppercase text-sm">
-          Premium Essentials
+          {t.subtitle}
         </p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {categories.map((category, idx) => {
           const categoryItems = items.filter(i => i.category === category);
-          const previewImage = categoryItems[0]?.imageUrl || `https://picsum.photos/seed/${category}/800/1000`;
+          const configuredCover = categoryConfigs[category];
+          const previewImage = configuredCover || categoryItems[0]?.imageUrl || `https://picsum.photos/seed/${category}/800/1000`;
           
           return (
             <motion.div
@@ -205,25 +482,42 @@ function CatalogView({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => onSelectCategory(category)}
               className="group cursor-pointer relative aspect-[3/4] overflow-hidden bg-charcoal"
             >
-              <img 
-                src={previewImage} 
-                alt={category}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-navy/40 group-hover:bg-navy/60 transition-colors" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                <h2 className="text-3xl font-serif text-ivory mb-2 tracking-tight">
-                  {category}
-                </h2>
-                <div className="h-px w-12 bg-gold transition-all duration-500 group-hover:w-24" />
-                <span className="mt-4 text-gold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Collection
-                </span>
+              <div 
+                onClick={() => onSelectCategory(category)}
+                className="w-full h-full"
+              >
+                <img 
+                  src={previewImage} 
+                  alt={category}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-navy/40 group-hover:bg-navy/60 transition-colors" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                  <h2 className="text-3xl font-serif text-ivory mb-2 tracking-tight">
+                    {t.categories[category as keyof typeof t.categories] || category}
+                  </h2>
+                  <div className="h-px w-12 bg-gold transition-all duration-500 group-hover:w-24" />
+                  <span className="mt-4 text-gold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    {t.viewCollection}
+                  </span>
+                </div>
               </div>
+
+              {isAdmin && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCategoryCoverUpload(category);
+                  }}
+                  className="absolute top-4 right-4 p-2 bg-gold text-navy rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-ivory"
+                  title={t.changeCover}
+                >
+                  <Upload className="w-4 h-4" />
+                </button>
+              )}
             </motion.div>
           );
         })}
@@ -236,45 +530,53 @@ function CategoryItemsView({
   category, 
   items, 
   onBack,
-  isAdmin 
+  isAdmin,
+  t,
+  isRTL
 }: { 
   category: string, 
   items: ClothingItem[], 
   onBack: () => void,
-  isAdmin: boolean
+  isAdmin: boolean,
+  t: any,
+  isRTL: boolean
 }) {
   const deleteItem = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
-      await deleteDoc(doc(db, 'items', id));
+      try {
+        await deleteDoc(doc(db, 'items', id));
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `items/${id}`);
+      }
     }
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      exit={{ opacity: 0, x: isRTL ? 20 : -20 }}
       className="space-y-12"
     >
       <button 
         onClick={onBack}
         className="flex items-center gap-2 text-gold hover:text-ivory transition-colors group"
       >
-        <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-        <span className="uppercase tracking-widest text-sm font-bold">Back to Catalog</span>
+        {isRTL ? <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /> : <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />}
+        <span className="uppercase tracking-widest text-sm font-bold">{t.backToCatalog}</span>
       </button>
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gold/20 pb-8">
-        <h2 className="text-5xl font-serif font-bold text-gold">{category}</h2>
+        <h2 className="text-5xl font-serif font-bold text-gold">{t.categories[category as keyof typeof t.categories] || category}</h2>
         <p className="text-ivory/60 uppercase tracking-widest text-xs">
-          {items.length} {items.length === 1 ? 'Item' : 'Items'} Found
+          {items.length} {items.length === 1 ? t.itemFound : t.itemsFound}
         </p>
       </div>
 
       {items.length === 0 ? (
         <div className="py-24 text-center">
           <Package className="w-12 h-12 text-charcoal mx-auto mb-4" />
-          <p className="text-ivory/40 italic">No items in this category yet.</p>
+          <p className="text-ivory/40 italic">{t.noItems}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
@@ -306,7 +608,7 @@ function CategoryItemsView({
                     {item.name}
                   </h3>
                   <span className="font-serif text-gold font-bold">
-                    ${item.price}
+                    {item.price} DH
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
@@ -325,7 +627,7 @@ function CategoryItemsView({
   );
 }
 
-function LoginView({ username, password, setUsername, setPassword, onLogin, onCancel }: any) {
+function LoginView({ onLogin, onCancel, t }: any) {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
@@ -333,51 +635,29 @@ function LoginView({ username, password, setUsername, setPassword, onLogin, onCa
       className="max-w-md mx-auto bg-charcoal p-12 shadow-2xl border border-gold/20"
     >
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-serif text-gold mb-2">Admin Login</h2>
-        <p className="text-ivory/40 text-sm">Access the management system</p>
+        <h2 className="text-3xl font-serif text-gold mb-2">{t.adminAccess}</h2>
+        <p className="text-ivory/40 text-sm">{t.signInGoogle}</p>
       </div>
-      <form onSubmit={onLogin} className="space-y-6">
-        <div className="space-y-2">
-          <label className="text-xs uppercase tracking-widest font-bold text-gold">Username</label>
-          <input 
-            type="text" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none transition-colors text-ivory"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs uppercase tracking-widest font-bold text-gold">Password</label>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none transition-colors text-ivory"
-            required
-          />
-        </div>
-        <div className="flex gap-4 pt-4">
-          <button 
-            type="button"
-            onClick={onCancel}
-            className="flex-1 p-3 border border-gold/20 text-ivory hover:bg-navy transition-colors uppercase text-xs tracking-widest font-bold"
-          >
-            Cancel
-          </button>
-          <button 
-            type="submit"
-            className="flex-1 p-3 bg-gold text-navy hover:bg-ivory transition-colors uppercase text-xs tracking-widest font-bold"
-          >
-            Login
-          </button>
-        </div>
-      </form>
+      <div className="space-y-6">
+        <button 
+          onClick={onLogin}
+          className="w-full p-4 bg-gold text-navy hover:bg-ivory transition-colors uppercase text-xs tracking-widest font-bold flex items-center justify-center gap-3"
+        >
+          <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+          {t.signInGoogle}
+        </button>
+        <button 
+          onClick={onCancel}
+          className="w-full p-3 border border-gold/20 text-ivory hover:bg-navy transition-colors uppercase text-xs tracking-widest font-bold"
+        >
+          {t.cancel}
+        </button>
+      </div>
     </motion.div>
   );
 }
 
-function AdminAddItem({ categories }: { categories: string[] }) {
+function AdminAddItem({ categories, t }: { categories: string[], t: any }) {
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -442,8 +722,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
       setSizes([]);
       setImageUrl('');
     } catch (err) {
-      console.error(err);
-      alert('Error adding item');
+      handleFirestoreError(err, OperationType.WRITE, 'items');
     }
   };
 
@@ -454,7 +733,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
         className="fixed bottom-6 left-6 p-4 bg-gold text-navy rounded-full shadow-xl hover:bg-ivory transition-all z-50 flex items-center gap-2 pr-6 group"
       >
         <Plus className="w-6 h-6 transition-transform group-hover:rotate-90" />
-        <span className="font-bold uppercase tracking-widest text-xs">Add New Item</span>
+        <span className="font-bold uppercase tracking-widest text-xs">{t.addNewItem}</span>
       </button>
 
       <AnimatePresence>
@@ -474,14 +753,14 @@ function AdminAddItem({ categories }: { categories: string[] }) {
               className="relative w-full max-w-2xl bg-charcoal shadow-2xl overflow-hidden border border-gold/20"
             >
               <div className="p-8 bg-navy text-gold flex justify-between items-center border-b border-gold/20">
-                <h2 className="text-2xl font-serif">New Catalog Entry</h2>
+                <h2 className="text-2xl font-serif">{t.newCatalogEntry}</h2>
                 <button onClick={() => setShowModal(false)}><X className="w-6 h-6" /></button>
               </div>
               
               <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Item Name</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">{t.itemName}</label>
                     <input 
                       type="text" 
                       value={name}
@@ -491,7 +770,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Price (USD)</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">{t.price}</label>
                     <input 
                       type="number" 
                       step="0.01"
@@ -502,14 +781,14 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Category</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">{t.category}</label>
                     <div className="relative">
                       <select 
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="w-full p-3 bg-navy border border-gold/20 focus:border-gold outline-none appearance-none text-ivory"
                       >
-                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        {categories.map(c => <option key={c} value={c}>{t.categories[c as keyof typeof t.categories] || c}</option>)}
                       </select>
                     </div>
                   </div>
@@ -517,7 +796,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Image</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">{t.image}</label>
                     <div 
                       onClick={handleUpload}
                       className="aspect-video bg-navy border-2 border-dashed border-gold/20 flex flex-col items-center justify-center cursor-pointer hover:border-gold transition-colors overflow-hidden relative"
@@ -527,14 +806,14 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                       ) : (
                         <>
                           <Upload className="w-8 h-8 text-gold/40 mb-2" />
-                          <span className="text-[10px] text-gold/40 uppercase tracking-widest">Upload via Cloudinary</span>
+                          <span className="text-[10px] text-gold/40 uppercase tracking-widest">{t.uploadCloudinary}</span>
                         </>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">Available Sizes</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold text-gold">{t.availableSizes}</label>
                     <div className="flex flex-wrap gap-2">
                       {availableSizes.map(size => (
                         <button
@@ -560,7 +839,7 @@ function AdminAddItem({ categories }: { categories: string[] }) {
                     type="submit"
                     className="w-full p-4 bg-gold text-navy font-bold uppercase tracking-[0.2em] text-sm hover:bg-ivory transition-colors"
                   >
-                    Publish to Catalog
+                    {t.publish}
                   </button>
                 </div>
               </form>

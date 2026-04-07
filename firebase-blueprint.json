@@ -13,12 +13,26 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
       },
       "required": ["name", "price", "category", "imageUrl", "sizes"]
+    },
+    "CategoryConfig": {
+      "title": "Category Configuration",
+      "description": "Configuration for a category, such as its cover image",
+      "type": "object",
+      "properties": {
+        "categoryName": { "type": "string", "description": "The name of the category" },
+        "coverImageUrl": { "type": "string", "description": "The URL of the category cover image" }
+      },
+      "required": ["categoryName", "coverImageUrl"]
     }
   },
   "firestore": {
     "/items/{itemId}": {
       "schema": "ClothingItem",
       "description": "Collection of clothing items"
+    },
+    "/categories/{categoryId}": {
+      "schema": "CategoryConfig",
+      "description": "Collection of category configurations"
     }
   }
 }
