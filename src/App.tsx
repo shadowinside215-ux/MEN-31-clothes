@@ -48,6 +48,7 @@ const translations = {
     availableSizes: "Available Sizes",
     publish: "Publish to Catalog",
     changeCover: "Change Category Cover",
+    buyNow: "Buy Now",
     categories: {
       "MEN 31 Clothes": "MEN 31 Clothes",
       "Sports": "Sports",
@@ -80,6 +81,7 @@ const translations = {
     availableSizes: "Tailles Disponibles",
     publish: "Publier au Catalogue",
     changeCover: "Changer la Couverture",
+    buyNow: "Acheter",
     categories: {
       "MEN 31 Clothes": "Vêtements MEN 31",
       "Sports": "Sport",
@@ -112,6 +114,7 @@ const translations = {
     availableSizes: "المقاسات المتاحة",
     publish: "نشر في الكتالوج",
     changeCover: "تغيير غلاف الفئة",
+    buyNow: "اشتري الآن",
     categories: {
       "MEN 31 Clothes": "ملابس MEN 31",
       "Sports": "رياضة",
@@ -602,23 +605,33 @@ function CategoryItemsView({
                   </button>
                 )}
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-medium text-ivory group-hover:text-gold transition-colors">
-                    {item.name}
-                  </h3>
-                  <span className="font-serif text-gold font-bold">
-                    {item.price} DH
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {item.sizes.map(size => (
-                    <span key={size} className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold uppercase tracking-tighter">
-                      {size}
+                <div className="space-y-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-medium text-ivory group-hover:text-gold transition-colors">
+                      {item.name}
+                    </h3>
+                    <span className="font-serif text-gold font-bold">
+                      {item.price} DH
                     </span>
-                  ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {item.sizes.map(size => (
+                      <span key={size} className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold uppercase tracking-tighter">
+                        {size}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="pt-4">
+                    <a 
+                      href="https://www.google.com/maps/search/?api=1&query=MAGASIN+2,+RESIDENCE+SALIMA+2,+MAHAJ+SALA+LJADIDA,+Av.+Moulay+Rachid,+Sala+Al+Jadida+11100"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 bg-gold text-navy text-center block text-xs font-bold uppercase tracking-widest hover:bg-ivory transition-colors"
+                    >
+                      {t.buyNow}
+                    </a>
+                  </div>
                 </div>
-              </div>
             </motion.div>
           ))}
         </div>
