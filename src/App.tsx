@@ -248,6 +248,7 @@ export default function App() {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [categoryConfigs, setCategoryConfigs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [configsLoading, setConfigsLoading] = useState(true);
 
   // Test connection to Firestore
   useEffect(() => {
@@ -296,8 +297,10 @@ export default function App() {
         configs[data.categoryName] = data.coverImageUrl;
       });
       setCategoryConfigs(configs);
+      setConfigsLoading(false);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, 'categories');
+      setConfigsLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -368,33 +371,39 @@ export default function App() {
       )}
 
       <main className={cn("max-w-7xl mx-auto px-6 py-12", isAdmin && "pt-24")}>
-        <AnimatePresence mode="wait">
-          {showLogin ? (
-            <LoginView 
-              onLogin={handleLogin}
-              onCancel={() => setShowLogin(false)}
-              t={t}
-            />
-          ) : selectedCategory ? (
-            <CategoryItemsView 
-              category={selectedCategory}
-              items={items.filter(i => i.category === selectedCategory)}
-              onBack={() => setSelectedCategory(null)}
-              isAdmin={isAdmin}
-              t={t}
-              isRTL={isRTL}
-            />
-          ) : (
-            <CatalogView 
-              categories={CATEGORIES}
-              onSelectCategory={setSelectedCategory}
-              isAdmin={isAdmin}
-              items={items}
-              categoryConfigs={categoryConfigs}
-              t={t}
-            />
-          )}
-        </AnimatePresence>
+        {(loading || configsLoading) ? (
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {showLogin ? (
+              <LoginView 
+                onLogin={handleLogin}
+                onCancel={() => setShowLogin(false)}
+                t={t}
+              />
+            ) : selectedCategory ? (
+              <CategoryItemsView 
+                category={selectedCategory}
+                items={items.filter(i => i.category === selectedCategory)}
+                onBack={() => setSelectedCategory(null)}
+                isAdmin={isAdmin}
+                t={t}
+                isRTL={isRTL}
+              />
+            ) : (
+              <CatalogView 
+                categories={CATEGORIES}
+                onSelectCategory={setSelectedCategory}
+                isAdmin={isAdmin}
+                items={items}
+                categoryConfigs={categoryConfigs}
+                t={t}
+              />
+            )}
+          </AnimatePresence>
+        )}
       </main>
 
       {/* Admin Add Modal */}
